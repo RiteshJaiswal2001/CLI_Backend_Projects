@@ -10,32 +10,35 @@ function game() {
 2. Medium (5 chances)
 3. Hard (3 chances)`);
 
-  const userInput = prompt("Enter your choice: ");
-  // const userInput = 1
   let leftGuess = 0;
-
   let difficultyLevel = "";
-  if (userInput == 1) {
-    difficultyLevel = "Easy";
-    leftGuess = 10;
-  } else if (userInput == 2) {
-    difficultyLevel = "Medium";
-    leftGuess = 5;
-  } else if (userInput == 3) {
-    difficultyLevel = "Hard";
-    leftGuess = 3;
-  } else {
-    console.log("Enter valid difficulty level.");
-    return;
+  function difficultyLevelChoice() {
+    const userInput = prompt("Enter your choice: ");
+    // const userInput = 1
+
+    if (userInput == 1) {
+      difficultyLevel = "Easy";
+      leftGuess = 10;
+    } else if (userInput == 2) {
+      difficultyLevel = "Medium";
+      leftGuess = 5;
+    } else if (userInput == 3) {
+      difficultyLevel = "Hard";
+      leftGuess = 3;
+    } else {
+      console.log("Enter valid difficulty level.");
+      return difficultyLevelChoice();
+    }
   }
-  
+  difficultyLevelChoice();
+  let totalAttempt = leftGuess;
   console.log(`Great! You have selected the ${difficultyLevel} difficulty level.
 Let's start the game!`);
   const computerNumber = Math.floor(Math.random() * 100 + 1);
-//   console.log(computerNumber);
+  //   console.log(computerNumber);
 
   function numberGame(leftGuess) {
-    console.log(`${userInput} ${leftGuess}`);
+    // console.log(`${userInput} ${leftGuess}`);
     if (leftGuess == 0) {
       console.log("You did not guess the number in given attempts");
       const validate = prompt(
@@ -58,15 +61,19 @@ Let's start the game!`);
 
     if (userGuessedNumber > computerNumber) {
       console.log(`Incorrect! The number is less than ${userGuessedNumber}.`);
+      console.log(
+        `Now you have ${leftGuess - 1} attempt out of ${totalAttempt} to guess the number.`,
+      );
       return numberGame(leftGuess - 1);
     } else if (userGuessedNumber < computerNumber) {
       console.log(`Incorrect! The number is grater than ${userGuessedNumber}.`);
+      console.log(
+        `Now you have ${leftGuess - 1} attempt out of ${totalAttempt} to guess the number.`,
+      );
       return numberGame(leftGuess - 1);
     } else {
-        
-        
       console.log(
-        `Congratulations! You guessed the correct number in ${userInput - leftGuess} attempts.`,
+        `Congratulations! You guessed the correct number in ${totalAttempt - leftGuess + 1} attempts.`,
       );
       const validate = prompt(
         "if you want play again then enter 1 and not then 0: ",
@@ -80,7 +87,7 @@ Let's start the game!`);
     }
   }
 
-    numberGame(leftGuess);
+  numberGame(leftGuess);
 }
 
 game();
