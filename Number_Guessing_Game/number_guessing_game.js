@@ -1,8 +1,14 @@
+var prompt = require("prompt-sync")();
+
+const highScores = {
+  Easy: Infinity,
+  Medium: Infinity,
+  Hard: Infinity,
+};
+
 console.log(`Welcome to the Number Guessing Game!
 I'm thinking of a number between 1 and 100.
 You have 3 to 10 chances based on difficulty level to guess the correct number.`);
-
-var prompt = require("prompt-sync")();
 
 function game() {
   console.log(`Please select the difficulty level:
@@ -10,84 +16,109 @@ function game() {
 2. Medium (5 chances)
 3. Hard (3 chances)`);
 
-  let leftGuess = 0;
-  let difficultyLevel = "";
-  function difficultyLevelChoice() {
-    const userInput = prompt("Enter your choice: ");
-    // const userInput = 1
-
-    if (userInput == 1) {
-      difficultyLevel = "Easy";
-      leftGuess = 10;
-    } else if (userInput == 2) {
-      difficultyLevel = "Medium";
-      leftGuess = 5;
-    } else if (userInput == 3) {
-      difficultyLevel = "Hard";
-      leftGuess = 3;
-    } else {
-      console.log("Enter valid difficulty level.");
-      return difficultyLevelChoice();
-    }
-  }
-  difficultyLevelChoice();
-  let totalAttempt = leftGuess;
-  console.log(`Great! You have selected the ${difficultyLevel} difficulty level.
+  const totalAttempts = difficultyLevelChoice();
+  const difficultyMap = {
+    10: "Easy",
+    5: "Medium",
+    3: "Hard",
+  };
+  const difficulty_Name = difficultyMap[totalAttempts];
+  console.log(`Great! You have selected the ${difficulty_Name} difficulty level.
 Let's start the game!`);
+  if (highScores[difficulty_Name] !== Infinity) {
+    console.log(
+      `The high score for ${difficulty_Name} level is currently ${highScores[difficulty_Name]} attempts.`,
+    );
+  }
+  numberGame(totalAttempts, difficulty_Name);
+}
+
+function difficultyLevelChoice() {
+  while (true) {
+    const userInput = prompt("Enter your choice: ");
+
+    if (userInput == "1") {
+      return 10;
+    }
+    if (userInput == "2") {
+      return 5;
+    }
+    if (userInput == "3") {
+      return 3;
+    }
+
+    console.log("Invalid choice. Please enter 1, 2, or 3.");
+  }
+}
+
+function numberGame(totalAttempts,difficulty_Name) {
+  let attempt = 1;
   const computerNumber = Math.floor(Math.random() * 100 + 1);
-  //   console.log(computerNumber);
+  const start_time = Date.now()
+  while (attempt <= totalAttempts) {
+    const rawInput = prompt("Enter your guess: ");
+    const userGuessedNumber = Number(rawInput);
+    if (!validateGuess(userGuessedNumber)) continue;
 
-  function numberGame(leftGuess) {
-    // console.log(`${userInput} ${leftGuess}`);
-    if (leftGuess == 0) {
-      console.log("You did not guess the number in given attempts");
-      const validate = prompt(
-        "if you want play again then enter 1 and not then 0: ",
+    const check = validateGame(userGuessedNumber, computerNumber);
+    if (check) {
+      console.log(
+        `Congratulations! You guessed the correct number in ${attempt} attempts.`,
       );
-
-      if (validate == 1) {
-        return game();
-      } else {
-        return;
+      const end_time = Date.now()
+      const time_taken =Math.round( (end_time-start_time)/1000)
+      console.log(`It took you ${time_taken} seconds.`);
+       if (attempt < highScores[difficulty_Name]) {
+        highScores[difficulty_Name] = attempt;
+        console.log(`🎉 New High Score for ${difficulty_Name} difficulty!`);
       }
+      break;
     }
 
-    const userGuessedNumber = prompt("Enter your guess: ");
+    if (attempt < totalAttempts)
+      console.log(`Now you have ${totalAttempts - attempt} attempt left.`);
 
-    if (userGuessedNumber > 100 || userGuessedNumber < 1) {
-      console.log(`Please enter valid Number between 1 to 100.`);
-      return numberGame(leftGuess);
-    }
-
-    if (userGuessedNumber > computerNumber) {
-      console.log(`Incorrect! The number is less than ${userGuessedNumber}.`);
-      console.log(
-        `Now you have ${leftGuess - 1} attempt out of ${totalAttempt} to guess the number.`,
-      );
-      return numberGame(leftGuess - 1);
-    } else if (userGuessedNumber < computerNumber) {
-      console.log(`Incorrect! The number is grater than ${userGuessedNumber}.`);
-      console.log(
-        `Now you have ${leftGuess - 1} attempt out of ${totalAttempt} to guess the number.`,
-      );
-      return numberGame(leftGuess - 1);
-    } else {
-      console.log(
-        `Congratulations! You guessed the correct number in ${totalAttempt - leftGuess + 1} attempts.`,
-      );
-      const validate = prompt(
-        "if you want play again then enter 1 and not then 0: ",
-      );
-
-      if (validate == 1) {
-        return game();
-      } else {
-        return;
-      }
-    }
+    attempt++;
   }
 
-  numberGame(leftGuess);
+  if (totalAttempts < attempt) {
+    console.log(
+      `You did not guess the number in given attempts , The number is ${computerNumber}`,
+    );
+  }
+  startAgain();
+}
+
+function startAgain() {
+  const validate = prompt(
+    "if you want play again then enter 1 and not then press enter: ",
+  );
+
+  if (validate == 1) {
+    return game();
+  }
+
+  console.log("Thanks for playing!");
+}
+
+function validateGuess(value) {
+  if (isNaN(value) || value > 100 || value < 1) {
+    console.log(`Please enter valid Number between 1 to 100.`);
+    return false;
+  }
+
+  return true;
+}
+
+function validateGame(value, computerNumber) {
+  if (value > computerNumber) {
+    console.log(`Incorrect! The number is less than ${value}.`);
+    return false;
+  } else if (value < computerNumber) {
+    console.log(`Incorrect! The number is grater than ${value}.`);
+    return false;
+  }
+  return true;
 }
 
 game();
